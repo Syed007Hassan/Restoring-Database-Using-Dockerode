@@ -24,19 +24,6 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - postgres
-      - redis
-
-  redis:
-    container_name: redis-db
-    image: redis
-    environment:
-      - REDIS_PORT=6379
-    ports:
-      - 6379:6379
-    networks:
-      - backend_network
-    volumes:
-      - redis:/data
 
   postgres:
     container_name: postgres-db
@@ -74,5 +61,3 @@ networks:
 
 volumes:
   postgres_data: {}
-  redis:
-    driver: local

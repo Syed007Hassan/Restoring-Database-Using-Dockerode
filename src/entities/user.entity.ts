@@ -7,7 +7,6 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { Comment } from './comment.entity';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
@@ -24,7 +23,4 @@ export class User {
 
   @Column({ nullable: true })
   avatar: string;
-
-  @OneToMany((type) => Comment, (comment) => comment.user)
-  comments: Comment[];
 }
