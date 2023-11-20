@@ -57,20 +57,23 @@ export class UserService {
 
   async runContainer() {
     try {
+      // Create a new Docker object
       const docker = new Docker({ socketPath: '/var/run/docker.sock' });
 
-      // Pull the image
+      // Pull the 'hello-world:latest' image from Docker Hub
       await new Promise((resolve, reject) => {
         docker.pull('hello-world:latest', (err, stream) => {
           if (err) {
             return reject(err);
           }
+          // Follow the download progress of the image
           docker.modem.followProgress(stream, (err, res) =>
             err ? reject(err) : resolve(res),
           );
         });
       });
 
+      // Create a new container with the 'hello-world' image
       const container = await docker.createContainer({
         AttachStderr: true,
         AttachStdin: true,
@@ -81,6 +84,7 @@ export class UserService {
         Tty: false,
       });
 
+      // Attach a stream to the container's stdin and stdout
       const stream = await container.attach({
         hijack: true,
         stderr: true,
@@ -89,6 +93,7 @@ export class UserService {
         stream: true,
       });
 
+      // Create a promise that resolves to the container's stdout
       const stdout = new Promise((resolve) => {
         stream.on('data', (data) => {
           const response = data && data.slice(8).toString();
@@ -96,11 +101,16 @@ export class UserService {
         });
       });
 
+      // Start the container
       await container.start();
+      // End the stream
       stream.end();
+      // Wait for the container to finish
       await container.wait();
+      // Remove the container
       container.remove();
 
+      // Return the container's stdout
       return await stdout;
     } catch (error) {
       console.error(`Error is: ${error}`);
