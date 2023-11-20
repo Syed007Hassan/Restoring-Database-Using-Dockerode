@@ -10,7 +10,7 @@ import {
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('user')
 @Controller('user')
@@ -28,6 +28,9 @@ export class UserController {
   }
 
   @Get('listAllContainers')
+  @ApiOperation({
+    description: 'List all containers',
+  })
   async listAllContainers() {
     try {
       const containers = await this.userService.listAllContainers();
@@ -37,11 +40,14 @@ export class UserController {
     }
   }
 
-  @Post('create')
-  async create(@Body() createUserDto: CreateUserDto) {
+  @Post('runContainer')
+  @ApiOperation({
+    description: 'Run a hello-world image in a container',
+  })
+  async runContainer() {
     try {
-      const user = await this.userService.create(createUserDto);
-      return { success: true, data: user };
+      const output = await this.userService.runContainer();
+      return { success: true, data: output };
     } catch (err) {
       return { success: false, message: err.message };
     }

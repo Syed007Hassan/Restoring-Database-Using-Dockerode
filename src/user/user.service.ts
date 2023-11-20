@@ -55,6 +55,59 @@ export class UserService {
     }
   }
 
+  async runContainer() {
+    try {
+      const docker = new Docker({ socketPath: '/var/run/docker.sock' });
+
+      // Pull the image
+      await new Promise((resolve, reject) => {
+        docker.pull('hello-world:latest', (err, stream) => {
+          if (err) {
+            return reject(err);
+          }
+          docker.modem.followProgress(stream, (err, res) =>
+            err ? reject(err) : resolve(res),
+          );
+        });
+      });
+
+      const container = await docker.createContainer({
+        AttachStderr: true,
+        AttachStdin: true,
+        AttachStdout: true,
+        Image: 'hello-world',
+        OpenStdin: true,
+        StdinOnce: true,
+        Tty: false,
+      });
+
+      const stream = await container.attach({
+        hijack: true,
+        stderr: true,
+        stdin: true,
+        stdout: true,
+        stream: true,
+      });
+
+      const stdout = new Promise((resolve) => {
+        stream.on('data', (data) => {
+          const response = data && data.slice(8).toString();
+          resolve(response);
+        });
+      });
+
+      await container.start();
+      stream.end();
+      await container.wait();
+      container.remove();
+
+      return await stdout;
+    } catch (error) {
+      console.error(`Error is: ${error}`);
+      return Promise.reject(error);
+    }
+  }
+
   async listAllContainers() {
     try {
       const docker = new Docker({ socketPath: '/var/run/docker.sock' });
