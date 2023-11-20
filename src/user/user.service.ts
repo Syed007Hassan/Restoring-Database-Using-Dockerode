@@ -55,6 +55,17 @@ export class UserService {
     }
   }
 
+  async listAllContainers() {
+    try {
+      const docker = new Docker({ socketPath: '/var/run/docker.sock' });
+      const containers = await docker.listContainers({ all: true });
+      return containers;
+    } catch (error) {
+      console.error(`Error is: ${error}`);
+      throw error;
+    }
+  }
+
   async create(createUserDto: CreateUserDto): Promise<User> {
     const saltRounds = 10;
     const hash = bcrypt.hashSync(createUserDto.password, saltRounds);

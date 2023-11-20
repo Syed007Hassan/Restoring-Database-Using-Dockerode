@@ -17,21 +17,31 @@ import { ApiTags } from '@nestjs/swagger';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post('create')
-  async create(@Body() createUserDto: CreateUserDto) {
-    try {
-      const user = await this.userService.create(createUserDto);
-      return { success: true, data: user };
-    } catch (err) {
-      return { success: false, message: err.message };
-    }
-  }
-
   @Get('loadDataBaseDump')
   async loadDataBaseDump() {
     try {
       const data = await this.userService.loadDataBaseDump();
       return { success: true, data: data };
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  }
+
+  @Get('listAllContainers')
+  async listAllContainers() {
+    try {
+      const containers = await this.userService.listAllContainers();
+      return { success: true, data: containers };
+    } catch (err) {
+      return { success: false, message: err.message };
+    }
+  }
+
+  @Post('create')
+  async create(@Body() createUserDto: CreateUserDto) {
+    try {
+      const user = await this.userService.create(createUserDto);
+      return { success: true, data: user };
     } catch (err) {
       return { success: false, message: err.message };
     }
