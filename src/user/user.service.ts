@@ -15,34 +15,44 @@ export class UserService {
   ) {}
 
   async loadDataBaseDump() {
-    // Define the path to the dump file
+    // Define the path to the dump file inside the container
     const dumpFilePath = '/dbDumpFile/postgres.tar';
 
     try {
+      // Create a new Docker object
       const docker = new Docker({ socketPath: '/var/run/docker.sock' });
 
+      // Get the 'postgres-db' container
       const container = docker.getContainer('postgres-db');
+
+      // Define the command to restore the database dump
       const command = [
         'bash',
         '-c',
         `PGPASSWORD=${process.env.PG_PASSWORD} pg_restore --verbose --clean --no-acl --no-owner -h${process.env.PG_HOST} -U${process.env.PG_USER} -d${process.env.PG_DB} ${dumpFilePath}`,
       ];
 
+      // Define the options for the exec command
       const options = {
         Cmd: command,
         AttachStdout: true,
         AttachStderr: true,
       };
 
+      // Create an exec instance with the command and options
       const exec = await container.exec(options);
+
+      // Start the exec instance and attach a stream to its stdout and stderr
       const result = await new Promise((resolve, reject) => {
         exec.start({ hijack: true, stdin: true }, (err, stream) => {
           if (err) {
             reject(err);
           }
 
+          // Demultiplex the stream into stdout and stderr
           container.modem.demuxStream(stream, process.stdout, process.stderr);
 
+          // Resolve the promise when the stream ends
           stream.on('end', () => resolve('Command execution completed'));
         });
       });
