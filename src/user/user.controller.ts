@@ -18,6 +18,9 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get('loadDataBaseDump')
+  @ApiOperation({
+    description: 'Load/Import the database dump',
+  })
   async loadDataBaseDump() {
     try {
       const data = await this.userService.loadDataBaseDump();
