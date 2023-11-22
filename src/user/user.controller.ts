@@ -17,7 +17,7 @@ import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Get('loadDataBaseDump')
+  @Post('loadDataBaseDump')
   @ApiOperation({
     description: 'Load/Import the database dump',
   })
